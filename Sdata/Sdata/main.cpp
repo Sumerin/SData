@@ -6,6 +6,8 @@
 #include <windows.h>
 #include <fstream>
 
+#include <iostream> // temp 
+
 #define ERROR WSAGetLastError()			// gives the error code 
 #define PORT 1112						// port for connection
 #define BROADCAST_ADDRES "127.0.0.1"	// need to be change to given from keyboard
@@ -17,7 +19,83 @@ typedef int(_stdcall  * dir_r)(SOCKET, char *, int, int);			// allows a pointer 
 using namespace std;
 
 
+bool ipPattern(string IP)
+{
 
+	int counter = 0;
+
+
+
+
+
+	for (int i = 0; i < 4; i++) // 4 BYTES
+	{
+
+
+		int number = 0;
+		bool blank = true;
+
+		if ((unsigned)counter < IP.size()) // in case there is less then 4
+		{
+
+			while (IP[counter] >= '0' && IP[counter] <= '9')// convert char -> int
+			{
+
+				number *= 10;
+				number += IP[counter] - '0';
+
+				counter++;
+
+
+				blank = false; // to be sure if there is a number not just "10..0"
+			}
+
+			if (blank) // we don't want blank ip
+			{
+				return false;
+			}
+
+
+			if (IP[counter] != '.' && (unsigned)counter < IP.size()) // dot between Bytes if it isn't last one   
+			{
+
+				return false;
+			}
+
+
+			if (number > 255 || number < 0)// BYTE got value <255;0>
+			{
+				return false;
+			}
+
+
+			counter++; // next sign
+
+
+		}
+		else
+		{
+			return false;
+		}
+
+	}
+
+	return true;
+}
+
+
+string getIP()
+{
+	string IP;
+	do
+	{
+		printf("IP: ");
+		getline(cin, IP); // scanf("%s",&IP); // why it gave me 0.0.1 from 127.0.0.1
+
+	} while (!ipPattern(IP));
+
+	return IP;
+}
 
 
 
@@ -64,10 +142,10 @@ void sent_data(char* path)
 	int		read_byte_NBO;			// the sam but in Network Byte Order
 	int		result;					// result of conecting
 
-
+	string address = getIP();
 	sockaddr_in addr;
 	int			size_addr = sizeof(addr);
-	addr.sin_addr.s_addr = inet_addr(BROADCAST_ADDRES); // address of recv 
+	addr.sin_addr.s_addr = inet_addr(address.c_str()); // address of recv 
 	addr.sin_port		 = htons(PORT);					// port of recv
 	addr.sin_family		 = AF_INET;						// IPV4
 
@@ -210,7 +288,7 @@ void recv_data()
 
 
 		delete[] name;	// clr the buffer of name
-		delete[] buffer;// clr the buff for data
+		//delete[] buffer;// clr the buff for data
 
 	}
 	catch (int a)
