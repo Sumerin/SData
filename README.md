@@ -1,2 +1,2 @@
 # SData
-Program to send files when we don't have pendrive /.
+Program to send files via TCP/IP
